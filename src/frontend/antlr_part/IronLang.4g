@@ -1,0 +1,99 @@
+grammar IronLang;
+
+// Лексерные правила
+IF: 'if';
+//PRINT: 'print';
+
+ID: [a-zA-Z_][a-zA-Z0-9_]*;
+INT_LITERAL: [0-9]+;
+FLOAT_LITERAL: [0-9]+ '.' [0-9]+;
+BOOL_LITERAL: 'true' | 'false';
+CHAR_LITERAL: '\'' . '\'';
+STRING_LITERAL: '"' .*? '"';
+
+ASSIGN: '=';
+SEMICOLON: ';';
+ADD: '+';
+SUB: '-';
+MUL: '*';
+DIV: '/';
+GT: '>';
+LT: '<';
+GE: '>=';
+LE: '<=';
+EQ: '==';
+NE: '!=';
+AND: '&&';
+OR: '||';
+
+LEFT_ROUND_BRACKET: '(';
+RIGHT_ROUND_BRACKET: ')';
+LEFT_CURLY_BRACKET: '{';
+RIGHT_CURLY_BRACKET: '}';
+
+WS: [ \t\r\n]+ -> skip;
+
+// Парсерные правила
+program: statement+;
+
+statement
+    : expression SEMICOLON
+    | assignment SEMICOLON
+    | if_statement
+    | function_statement SEMICOLON
+    ;
+
+if_statement
+    : IF LEFT_ROUND_BRACKET expression RIGHT_ROUND_BRACKET block
+    ;
+
+block
+    : LEFT_CURLY_BRACKET statement* RIGHT_CURLY_BRACKET
+    ;
+
+assignment
+    : ID ASSIGN expression
+    ;
+
+function_statement
+    : ID LEFT_ROUND_BRACKET expression RIGHT_ROUND_BRACKET
+    ;
+
+// Выражения
+expression
+    : logicalOrExpression
+    ;
+
+logicalOrExpression
+    : logicalAndExpression (OR logicalAndExpression)*
+    ;
+
+logicalAndExpression
+    : equalityExpression (AND equalityExpression)*
+    ;
+
+equalityExpression
+    : relationalExpression ((EQ | NE) relationalExpression)*
+    ;
+
+relationalExpression
+    : additiveExpression ((GT | LT | GE | LE) additiveExpression)*
+    ;
+
+additiveExpression
+    : multiplicativeExpression ((ADD | SUB) multiplicativeExpression)*
+    ;
+
+multiplicativeExpression
+    : factor ((MUL | DIV) factor)*
+    ;
+
+factor
+    : INT_LITERAL
+    | FLOAT_LITERAL
+    | BOOL_LITERAL
+    | CHAR_LITERAL
+    | STRING_LITERAL
+    | ID
+    | LEFT_ROUND_BRACKET expression RIGHT_ROUND_BRACKET
+    ;
